@@ -26,31 +26,41 @@ def flatten_path(graph, path):
 	'''
 	#st.info
 	prev=0
-	total_time=0
-	total_total=0
-	wait=1
+	total_time=0 #total time for 1 segment
+	total_total=0 #total time for trip
+	wait=5 #inbetween waiting times
+	curr_list = []
+	st.write("Maximum waiting time: 5 min")
 	for i in range(len(path)-1):
 		name1=graph.get_station_name(path[i])
 		name2=graph.get_station_name(path[i+1])
+
 		if graph.same_line(path[i],path[i+1]): # at the end of a line(either interchange or end of list), print the total time for that segment.
 			if prev==0:
-				print(name1)#, end="")
+				curr_list.append(name1)
 				prev=1
-			st.write(f" ➔ {name2}")#,end="")
+			curr_list.append(name2)
 			total_time+=graph.neighbours_list[path[i]][path[i+1]]
 		elif name1==name2:
+			#print earlier segment
+			print_segment = " ➔ ".join(curr_list)
+			st.write(print_segment)
 			st.write(f' Time: {total_time} min')
+
+			#update counters
 			total_total+=total_time
 			total_time=0
+			curr_list = [] #reset
+
+			#print transfer time
 			transfer_time=graph.neighbours_list[path[i]][path[i+1]]
 			st.write(f"Transfer at {name1} from {path[i]} to {path[i+1]}. Time: {transfer_time} min") #print transfer time.
 			st.write("Maximum waiting time: 5 min")
-			wait+=1
+			wait+=5
 			total_total+=transfer_time
 			prev=0
 	#at end of line, check and clear if not empty
-	st.write(f'Time: {total_total} to {total_total+(wait*5)} min')
-	st.write('\n')
+	st.write(f'Time: {total_total} to {total_total+wait} min')
 
 mrt_map=init_mrt_graph()
 
