@@ -46,7 +46,6 @@ def flatten_path(graph, path):
 			print_segment = " ➔ ".join(curr_list)
 			st.write(print_segment)
 			st.write(f' Time: {total_time} min')
-
 			#update counters
 			total_total+=total_time
 			total_time=0
@@ -60,6 +59,14 @@ def flatten_path(graph, path):
 			total_total+=transfer_time
 			prev=0
 	#at end of line, check and clear if not empty
+	if total_time >0:
+		print_segment = " ➔ ".join(curr_list)
+		st.write(print_segment)
+		st.write(f' Time: {total_time} min')
+		total_total+=total_time
+		total_time=0
+		curr_list = [] #reset
+
 	st.write(f'Time: {total_total} to {total_total+wait} min')
 
 mrt_map=init_mrt_graph()
