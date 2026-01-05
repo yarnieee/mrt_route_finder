@@ -1,0 +1,4 @@
+pandas
+streamlit==1.25.0
+heapq
+requests

@@ -1,105 +1,70 @@
+import streamlit as st
 import pandas as pd
-from heapq import heapify, heappop, heappush
+from src.routing_logic import Graph
 
-class Graph:
-	def __init__(self, size):
-		self.adj_matrix = {}
-		self.size = size
-		self.count = 0
-		self.vertex_data = {}
+#cache-- loaded once
+@st.cache_resource
+def init_mrt_graph():
+	intervals=pd.read_csv('data/intervals.csv')
+	stn_name=pd.read_csv('data/station_name.csv')
 
-	def add_edge(self, start, end, time):
-		if start in self.vertex_data and end in self.vertex_data:
-			self.adj_matrix[start][end] = time
+	size=len(stn_name)
+	interval_size=len(intervals)
+	mrt_map=Graph()
 
-	def add_vertex_data(self, vertex, data): #for vertex
-		self.vertex_data[vertex] = data
-		self.adj_matrix[vertex]={}
-		self.count+=1
-
-	def remove_vertex_data(self, vertex):
-		#call remove edge first, then remove entire vertex from vertex_data and adj_matrix
-		#for each item in the rmv_edge's sublist, go to the respective edge and remove rmv_edge from its sublist
-        #then remove the rmv_edge
-        #count remove 1
-		pass
-
-	def remove_edge(self, start, end):
-		#call remove edge for all edges connected to this vertex: first remove on this side, then use the key to remove on the other side
-		pass
-
-	def get_station_code(self, station_name):
-		codes = [k for k, v in self.vertex_data.items() if v == station_name]
-		return codes
-	
-	def get_station_name(self, station_code):
-		name = self.vertex_data[station_code]
-		return name
+	for i in range(size):
+		mrt_map.add_vertex_data(stn_name.iloc[i,0],stn_name.iloc[i,1]) #iloc is used to access the data in the dataframe
 		
-	def dijkstra(self, start_name):
-		start_code = self.get_station_code(start_name) #get code of station by name
-		distances = [float('inf')] * self.count
-		distances[start_code] = 0
-		visited = [False] * self.count
+	for i in range(interval_size):
+		mrt_map.add_edge(intervals.iloc[i,0], intervals.iloc[i,1], int(intervals.iloc[i,2]))
+	return mrt_map
 
-		for _ in range(self.size):
-			min_distance = float('inf') #set to +ve infinity value
-			u = None
-			for i in range(self.size):
-				if not visited[i] and distances[i] < min_distance:
-					min_distance = distances[i]
-					u = i
+mrt_map=init_mrt_graph()
 
-			if u is None:
-				break
+#UI component
+st.title("MRT Route Finder")
+start=st.selectbox("Start",["Telok Blangah","Kovan","Kent Ridge","Changi Airport","Pasir Ris"])
+end=st.selectbox("End",["Telok Blangah","Kovan","Kent Ridge","Changi Airport","Pasir Ris"])
 
-			visited[u] = True
-
-			for v in range(self.size):
-				if self.adj_matrix[u][v] != 0 and not visited[v]:
-					alt = distances[u] + self.adj_matrix[u][v]
-					if alt < distances[v]:
-						distances[v] = alt
-		
-		return distances
+#execute
+if st.button("Calculate"):
+	time, path = mrt_map.path(start,end)
 	
-	def __str__(self):
-		result = "List of nodes:\n"
-		for key,value in self.vertex_data.items():
-			result += f"{key}: {value}\n"
-		return result
+	#display
+	st.subheader("SUggested Route")
+	st.metric(label="",value=f"Shortest time from {start} ({mrt_map.get_station_code(start)}) to {end} ({mrt_map.get_station_code(start)}) is {time} minutes.")
 
-#load data
-intervals=pd.read_csv('intervals.csv')
-stn_name=pd.read_csv('station_name.csv')
+	path_str = " ➔ ".join(path)
+	st.info(path_str)
 
-#preprocess
-intervals=intervals.map(lambda x: x.strip() if isinstance(x, str) else x)
-stn_name=stn_name.map(lambda x: x.strip() if isinstance(x, str) else x)
-
-#save dataframe as csv
-#intervals.to_csv('intervals.csv', index=False)
-#stn_name.to_csv('station_name.csv', index=False)
-
-#fonstruct graph
-size=len(stn_name)
-interval_size=len(intervals)
-mrt_map=Graph(size)
-
-#construct graph
-for i in range(size):
-    mrt_map.add_vertex_data(stn_name.iloc[i,0],stn_name.iloc[i,1]) #iloc is used to access the data in the dataframe
-    
-for i in range(interval_size):
-    mrt_map.add_edge(intervals.iloc[i,0], intervals.iloc[i,1], int(intervals.iloc[i,2]))
-    
-with open('mrt_map_dict.txt','w') as file:
-    for key, value in mrt_map.adj_matrix.items():
-    	file.write(f"{key}: {value}")
-        
-#test for correct station
-mrt_map.get_station_code("Outram Park")
-# mrt_map.get_station_name('NE3')
-
-#use algorithm to get shortest distances
-mrt_map.dijkstra("TE11")
+# def flatten_path(self, path):
+# 		'''
+# 		compare curr and next, flatten timings and paths on the same line
+# 		#specify interchanges
+# 		'''
+# 		prev=0
+# 		total_time=0
+# 		total_total=0
+# 		wait=1
+# 		for i in range(len(path)-1):
+# 			name1=self.get_station_name(path[i])
+# 			name2=self.get_station_name(path[i+1])
+# 			if self.same_line(path[i],path[i+1]): # at the end of a line(either interchange or end of list), print the total time for that segment.
+# 				if prev==0:
+# 					print(name1, end="")
+# 					prev=1
+# 				print(f" -> {name2}",end="")
+# 				total_time+=self.neighbours_list[path[i]][path[i+1]]
+# 			elif name1==name2:
+# 				print(f' Time: {total_time} min')
+# 				total_total+=total_time
+# 				total_time=0
+# 				transfer_time=self.neighbours_list[path[i]][path[i+1]]
+# 				print(f"Transfer at {name1} from {path[i]} to {path[i+1]}. Time: {transfer_time} min") #print transfer time.
+# 				print("Maximum waiting time: 5 min")
+# 				wait+=1
+# 				total_total+=transfer_time
+# 				prev=0
+# 		#at end of line, check and clear if not empty
+# 		print(f'Time: {total_total} to {total_total+(wait*5)} min')
+# 		print('\n')
