@@ -30,7 +30,8 @@ def flatten_path(graph, path):
 	total_total=0 #total time for trip
 	wait=5 #inbetween waiting times
 	curr_list = []
-	st.write("Maximum waiting time: 5 min")
+	if path[0]!=path[-1]:
+		st.write("Maximum waiting time: 5 min")
 	for i in range(len(path)-1):
 		name1=graph.get_station_name(path[i])
 		name2=graph.get_station_name(path[i+1])
@@ -74,8 +75,8 @@ mrt_map=init_mrt_graph()
 #UI component
 st.title("MRT Route Finder")
 st.write("the realistic estimate of how long your trip will take. factors in interchange and waiting times.")
-start=st.selectbox("Start",["Telok Blangah","Kovan","Kent Ridge","Changi Airport","Pasir Ris"])
-end=st.selectbox("End",["Tan Kah Kee","Kovan","Kent Ridge","Changi Airport","Pasir Ris"])
+start=st.selectbox("Start",["Telok Blangah","Labrador Park","Kovan","Kent Ridge","Changi Airport","Pasir Ris"])
+end=st.selectbox("End",["Tan Kah Kee","Telok Blangah","Labrador Park","Kovan","Kent Ridge","Changi Airport","Pasir Ris"])
 
 #execute
 if st.button("Calculate"):
