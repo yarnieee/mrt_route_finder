@@ -68,7 +68,7 @@ mrt_map=init_mrt_graph()
 st.title("MRT Route Finder")
 st.write("the realistic estimate of how long your trip will take. factors in interchange and waiting times.")
 start=st.selectbox("Start",["Telok Blangah","Kovan","Kent Ridge","Changi Airport","Pasir Ris"])
-end=st.selectbox("End",["Telok Blangah","Kovan","Kent Ridge","Changi Airport","Pasir Ris"])
+end=st.selectbox("End",["Tan Kah Kee","Kovan","Kent Ridge","Changi Airport","Pasir Ris"])
 
 #execute
 if st.button("Calculate"):
