@@ -34,9 +34,9 @@ def flatten_path(graph, path):
 		name2=graph.get_station_name(path[i+1])
 		if graph.same_line(path[i],path[i+1]): # at the end of a line(either interchange or end of list), print the total time for that segment.
 			if prev==0:
-				print(name1, end="")
+				print(name1)#, end="")
 				prev=1
-			st.write(f" ➔ {name2}",end="")
+			st.write(f" ➔ {name2}")#,end="")
 			total_time+=graph.neighbours_list[path[i]][path[i+1]]
 		elif name1==name2:
 			st.write(f' Time: {total_time} min')
@@ -56,6 +56,7 @@ mrt_map=init_mrt_graph()
 
 #UI component
 st.title("MRT Route Finder")
+st.write("the realistic estimate of how long your trip will take. factors in interchange and waiting times.")
 start=st.selectbox("Start",["Telok Blangah","Kovan","Kent Ridge","Changi Airport","Pasir Ris"])
 end=st.selectbox("End",["Telok Blangah","Kovan","Kent Ridge","Changi Airport","Pasir Ris"])
 
@@ -64,7 +65,7 @@ if st.button("Calculate"):
 	time, path = mrt_map.path(start,end)
 	
 	#display
-	st.subheader("SUggested Route")
+	st.subheader("Suggested Route")
 	st.write(f"Shortest time from {start} ({mrt_map.get_station_code(start)}) to {end} ({mrt_map.get_station_code(start)}) is {time} minutes.")
 
 	flatten_path(mrt_map, path)
