@@ -24,14 +24,16 @@ def flatten_path(graph, path):
 	compare curr and next, flatten timings and paths on the same line
 	#specify interchanges
 	'''
-	#st.info
 	prev=0
 	total_time=0 #total time for 1 segment
 	total_total=0 #total time for trip
-	wait=5 #inbetween waiting times
+	wait_time=5 #inbetween waiting times
+	wait_total=0
 	curr_list = []
+	rows = []
 	if path[0]!=path[-1]:
-		st.write("Maximum waiting time: 5 min")
+		rows.append({"Segment": "Platform Wait Time", "Time (min)": wait_time})
+		wait_total+=wait_time
 	for i in range(len(path)-1):
 		name1=graph.get_station_name(path[i])
 		name2=graph.get_station_name(path[i+1])
@@ -44,9 +46,8 @@ def flatten_path(graph, path):
 			total_time+=graph.neighbours_list[path[i]][path[i+1]]
 		elif name1==name2:
 			#print earlier segment
-			print_segment = " ➔ ".join(curr_list)
-			st.write(print_segment)
-			st.write(f' Time: {total_time} min')
+			print_segment = " → ".join(curr_list)
+			rows.append({"Segment": print_segment, "Time (min)": total_time})
 			#update counters
 			total_total+=total_time
 			total_time=0
@@ -54,21 +55,21 @@ def flatten_path(graph, path):
 
 			#print transfer time
 			transfer_time=graph.neighbours_list[path[i]][path[i+1]]
-			st.write(f"Transfer at {name1} from {path[i]} to {path[i+1]}. Time: {transfer_time} min") #print transfer time.
-			st.write("Maximum waiting time: 5 min")
-			wait+=5
+			rows.append({"Segment": f"Transfer from {path[i]} to {path[i+1]}", "Time (min)": transfer_time})
+			rows.append({"Segment": "Platform Wait Time", "Time (min)": wait_time})
+			wait_total+=wait_time
 			total_total+=transfer_time
 			prev=0
 	#at end of line, check and clear if not empty
 	if total_time >0:
-		print_segment = " ➔ ".join(curr_list)
-		st.write(print_segment)
-		st.write(f' Time: {total_time} min')
+		print_segment = " → ".join(curr_list)
+		rows.append({"Segment": print_segment, "Time (min)": total_time})
 		total_total+=total_time
 		total_time=0
 		curr_list = [] #reset
 
-	st.write(f'Time: {total_total} to {total_total+wait} min')
+	st.table(pd.DataFrame(rows))
+	st.write(f'Time: {total_total} to {total_total+wait_total} min')
 
 mrt_map=init_mrt_graph()
 
